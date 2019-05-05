@@ -3,7 +3,7 @@
 library(data.table)
 library(stringr)
 
-source(/home/sergiy/Documents/Work/Nutricia/Scripts/Pivot2/addAge.R)
+source("/home/sergiy/Documents/Work/Nutricia/Scripts/Pivot2/addAge.R")
 setwd("/home/sergiy/Documents/Work/Nutricia/Rework/201903")
 df = fread("N_Y2018-Y19_M03.csv", check.names = TRUE)
 
@@ -15,15 +15,16 @@ dictPriceSegments = fread("/home/sergiy/Documents/Work/Nutricia/Rework/Dictionar
 
 df[grepl("PYURE", SKU), PRODUCT.FORM := "Pure"]
 
-# Age
-df = addAge(df)
-
-
 cols = c("SKU", "BRAND", "BRAND.OWNER",
           "DANONE.SEGMENT", "DANONE.SUB.SEGMENT",
           "PRODUCT.FORM", "TYPE...BABY.PRODUCT")
 
 df = melt.data.table(df, id.vars = cols)
+
+# df$value = as.numeric(df$value)
+
+# Age
+df = addAge(df)
 
 # Brand - Company
 df[dictCompanyBrand, on = c(BRAND = "NielsenBrand"), Brand := i.RTRIBrand]
@@ -66,7 +67,7 @@ df[, Volume := value*1000]
 
 df = df[, .(Volume = sum(Volume)), 
         by = .(SKU, Ynb, Mnb, 
-               Brand, Size, Company, 
+               Brand, Size, Age, Company, 
                PS0, PS3, PS2, PS, PRODUCT.FORM)]
 
 df[, Channel := "MT"]
@@ -80,19 +81,19 @@ df[, PRODUCT.FORM := NULL]
 df1 = fread("/home/sergiy/Documents/Work/Nutricia/1/Data/df.csv")
 df1 = df1[Ynb >= 2018 & Channel == "PHARMA",
           .(SKU, Ynb, Mnb, 
-            Brand, Size, Company, 
+            Brand, Size, Age, Company, 
             PS0, PS2, PS3, PS, Form, 
             Channel,
             Volume)]
 
 df1 = df1[, .(Volume = sum(Volume)),
           by = .(SKU, Ynb, Mnb, 
-                 Brand, Size, Company, 
+                 Brand, Size, Age, Company, 
                  PS0, PS2, PS3, PS, Form, 
                  Channel)]
 
 df = df[, .(SKU, Ynb, Mnb, 
-            Brand, Size, Company, 
+            Brand, Size, Age, Company, 
             PS0, PS2, PS3, PS, Form, 
             Channel,
             Volume)]
@@ -153,7 +154,7 @@ df[is.na(EC), .N]
 df[, VolumeC := Volume*EC]
 
 df = df[, .(SKU, Ynb, Mnb,
-            Brand, Size, Company,
+            Brand, Size, Age, Company,
             PS0, PS2, PS3, PS,
             Form, Channel, 
             PriceSegment, GlobalPriceSegment,
