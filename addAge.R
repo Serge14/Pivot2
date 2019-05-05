@@ -46,7 +46,7 @@ df[str_detect(Age2, "^[0-9]{1}[GL]$"),
 df[str_detect(Age2, "^[0-9]*-[0-9]*$"), Age := Age2]
 
 # Range with years
-df[str_detect(Age2, "-") & is.na(Age), Age := convertYtoM(Age2)]
+df[str_detect(Age2, "-") & is.na(Age), Age := mapply(convertYtoM, Age2)]
 
 # Assign NA to the rest
 df[is.na(Age), Age := "NA"]
