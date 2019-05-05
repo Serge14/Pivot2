@@ -3,6 +3,7 @@
 library(data.table)
 library(stringr)
 
+source(/home/sergiy/Documents/Work/Nutricia/Scripts/Pivot2/addAge.R)
 setwd("/home/sergiy/Documents/Work/Nutricia/Rework/201903")
 df = fread("N_Y2018-Y19_M03.csv", check.names = TRUE)
 
@@ -13,6 +14,10 @@ dictEC = fread("dictEC.csv")
 dictPriceSegments = fread("/home/sergiy/Documents/Work/Nutricia/Rework/Dictionaries/PriceSegments.csv")
 
 df[grepl("PYURE", SKU), PRODUCT.FORM := "Pure"]
+
+# Age
+df = addAge(df)
+
 
 cols = c("SKU", "BRAND", "BRAND.OWNER",
           "DANONE.SEGMENT", "DANONE.SUB.SEGMENT",
