@@ -6,6 +6,7 @@ library(stringr)
 source("/home/sergiy/Documents/Work/Nutricia/Scripts/Pivot2/addAge.R")
 setwd("/home/sergiy/Documents/Work/Nutricia/Rework/201903")
 df = fread("N_Y2018-Y19_M03.csv", check.names = TRUE)
+df = fread("N_Y2018-Y19_M03_value.csv", check.names = TRUE, na.strings = "NA")
 
 setwd("/home/sergiy/Documents/Work/Nutricia/Scripts/Pivot2")
 dictCompanyBrand = fread("dictCompanyBrand.csv")
@@ -24,7 +25,8 @@ df = melt.data.table(df, id.vars = cols)
 # df$value = as.numeric(df$value)
 
 # Age
-df = addAge(df)
+# df = addAge(df)
+df = addAge2(df)
 
 # Brand - Company
 df[dictCompanyBrand, on = c(BRAND = "NielsenBrand"), Brand := i.RTRIBrand]
@@ -84,6 +86,19 @@ df1 = df1[Ynb >= 2018 & Channel == "PHARMA",
             Brand, Size, Age, Company, 
             PS0, PS2, PS3, PS, Form, 
             Channel,
+            Value)]
+
+df1 = df1[, .(Value = sum(Value)),
+          by = .(SKU, Ynb, Mnb, 
+                 Brand, Size, Age, Company, 
+                 PS0, PS2, PS3, PS, Form, 
+                 Channel)]
+
+df1 = df1[Ynb >= 2018 & Channel == "PHARMA",
+          .(SKU, Ynb, Mnb, 
+            Brand, Size, Age, Company, 
+            PS0, PS2, PS3, PS, Form, 
+            Channel,
             Volume)]
 
 df1 = df1[, .(Volume = sum(Volume)),
@@ -101,6 +116,8 @@ df = df[, .(SKU, Ynb, Mnb,
 all(names(df) == names(df1))
 
 df = rbindlist(list(df[Volume > 0], df1))
+
+# df = rbindlist(list(df[Value > 0], df1))
 
 # Price Segments
 # Price Segments local
@@ -152,6 +169,7 @@ df[PS == "Hypoallergenic" & Channel == "PHARMA", EC := 1.1]
 df[is.na(EC), .N]
 
 df[, VolumeC := Volume*EC]
+df[, ValueC := Value*EC]
 
 df = df[, .(SKU, Ynb, Mnb,
             Brand, Size, Age, Company,
@@ -159,6 +177,13 @@ df = df[, .(SKU, Ynb, Mnb,
             Form, Channel, 
             PriceSegment, GlobalPriceSegment,
             Volume, EC, VolumeC)]
+
+df = df[, .(SKU, Ynb, Mnb,
+            Brand, Size, Age, Company,
+            PS0, PS2, PS3, PS,
+            Form, Channel, 
+            PriceSegment, GlobalPriceSegment,
+            Value, EC, ValueC)]
 
 setwd("/home/sergiy/Documents/Work/Nutricia/Rework/201903")
 fwrite(df, "df_MT_PH_SKU.csv", row.names = FALSE)

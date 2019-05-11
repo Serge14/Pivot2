@@ -55,3 +55,94 @@ df[is.na(Age), Age := "NA"]
 df[, Age2 := NULL]
 
 }
+
+addAge2 = function(df) {
+  
+  # Remove spaces
+  df[, SKU2 := str_replace_all(SKU, " ", "")]
+  df[, SKU2 := str_replace_all(SKU2, "ML", "XX")]
+  df[, SKU2 := str_sub(SKU2, start = -12)]
+  
+  #d-d
+  df[, Age2 := str_extract(SKU2, "[0-9]{1,2}-[0-9]{1,2}$")]
+  
+  #d[MES]-d[MES]
+  df[is.na(Age2), 
+     Age2 := str_extract(SKU2, "[0-9]{1,2}[M(?=ES).]*-[0-9]{1,2}[M(?=ES).]*$")]
+  
+  #Years
+  # df[is.na(Age2), 
+  #    Age2 := str_extract(SKU2, "[0-9]{1,2}[M(?=ES)\\.]*[GL]*-[1-9]{1,2}[M(?=ES).]*[GL]*$")][]
+  
+  df[is.na(Age2), 
+     Age2 := str_extract(SKU2, "[0-9]{1,2}[M(?=ES)\\.GL]*-[1-9]{1,2}[GL]*$")]
+  
+  #SdDN
+  # df[is.na(Age2), 
+  #    Age2 := str_extract(SKU2, "[S]{0,1}[0-9]{1,2}[D(?=N).]*$")]
+ 
+  df[is.na(Age2), 
+     Age2 := str_extract(SKU2, "[S]{0,1}[0-9]{1,2}DN?\\.?$")]
+  
+  df[is.na(Age2), 
+     Age2 := str_extract(SKU2, "[S]{0,1}[0-9]{1,2}DN?\\.?")]
+  
+  #SdMES
+  df[is.na(Age2), 
+     Age2 := str_extract(SKU2, "[S]{0,1}[0-9]{1,2}\\.*[0-9]*[M(?=ES)]*\\.?$")]
+  
+  #SdM in the end
+  df[is.na(Age2), 
+     Age2 := str_extract(SKU2, "[S]{0,1}[0-9]{1,2}[M]")]
+  
+  #SdY in the end
+  df[is.na(Age2), 
+     Age2 := str_extract(SKU2, "[S]{0,1}[1-9]{1}[GL]")]
+  
+  #d in the end
+  df[is.na(Age2), 
+     Age2 := str_extract(SKU2, "(?<=/)[1-9]{1,2}[(?=OLD)]*$")]
+  
+  
+  # Delete dots, but not in the digits
+  df[, Age2 := str_replace_all(Age2, "((?<![0-9])\\.)|(\\.(?![0-9]))", "")]
+  
+  # Delete unnecessary symbols
+  df[, Age2 := str_replace_all(Age2, "[/MESN]", "")]
+  df[, Age2 := str_replace_all(Age2, "=OLD", "")]
+  
+  ### Transform Ages to months
+  
+  # Assign NA to Age
+  df[, Age := NA]
+  df$Age = as.character(df$Age)
+  
+  # Only month is mentioned
+  df[str_detect(Age2, "^[0-9]+\\.*[0-9]*[M]?$"), 
+     Age := paste0(str_extract(Age2, "^[0-9]+\\.*[0-9]*"), "+")]
+  
+  # From the 1st day
+  df[str_detect(Age2, "^[0-9]{1}[D]$"), Age := "0+"]
+  
+  # From N years
+  df[str_detect(Age2, "^[0-9]{1}[GL]$"), 
+     Age := paste0(as.numeric(str_extract(Age2, "^[0-9]+"))*12, "+")]
+  
+  # Months & hyphen, letter M is optionally
+  df[str_detect(Age2, "^[0-9]+[M]*-[0-9]*[M]*$"), Age := Age2]
+  
+  # Range with years
+  df[str_detect(Age2, "-") & is.na(Age), Age := mapply(convertYtoM, Age2)]
+  
+  # 1-3L
+  df[str_detect(Age2, "1-3L?$"), Age := "12-36"]
+  
+  # Assign NA to the rest
+  df[is.na(Age), Age := "NA"]
+  
+  # Remove unnecessary columns
+  df[, Age2 := NULL]
+  df[, SKU2 := NULL]
+  
+  
+}
