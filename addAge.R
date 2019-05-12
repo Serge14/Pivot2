@@ -143,6 +143,5 @@ addAge2 = function(df) {
   # Remove unnecessary columns
   df[, Age2 := NULL]
   df[, SKU2 := NULL]
-  
-  
+ 
 }
