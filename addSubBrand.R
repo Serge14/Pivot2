@@ -1,6 +1,6 @@
 addSubBrand = function(df){
   
-  df[, SubBrand := str_extract(SKU, "[^0-9]{2,}")]
+  df[, SubBrand := str_split(SKU, "[^0-9]{2,}")[[1]][1]]
   df[, SubBrand := str_trim(SubBrand)]
   df[, SubBrand := str_remove(SubBrand, " P$")]
   df[, SubBrand := str_remove(SubBrand, " L$")]

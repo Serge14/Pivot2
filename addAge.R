@@ -143,5 +143,10 @@ addAge2 = function(df) {
   # Remove unnecessary columns
   df[, Age2 := NULL]
   df[, SKU2 := NULL]
- 
+  
+  # Add exclusions
+  df1 = fread("dictAgeExceptions.csv")
+  # SKUAgeExceptions = df1[, SKU]
+  # df[SKU %in% SKUAgeExceptions][df1, on = c(SKU = "SKU"), Age := i.Age]
+  df[df1, on = "SKU", Age := i.Age]
 }
