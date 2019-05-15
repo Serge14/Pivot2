@@ -46,7 +46,8 @@ df[dictSegments,
    `:=`(PS = i.PS, PS3 = i.PS3, PS0 = i.PS0)] # this is wrong due to PS2
 
 df = addPS2(df)
-df = addSubBrand(df)
+df[, SubBrand := mapply(addSubBrand2, SKU)]
+# df = addSubBrand(df)
 
 # Size
 df[, Size := str_extract(SKU, "[0-9]+[GML]+")]

@@ -1,19 +1,42 @@
-addSubBrand = function(df){
+addSubBrand = function(df) {
   
-  df[, SubBrand := str_split(SKU, "[0-9]{2,}")[[1]][1]]
-  df[, SubBrand := str_trim(SubBrand)]
-  df[, SubBrand := str_remove(SubBrand, " P$")]
-  df[, SubBrand := str_remove(SubBrand, " L$")]
-  df[, SubBrand := str_remove(SubBrand, " C$")]
-  df[, SubBrand := str_remove(SubBrand, " CW$")]
-  df[, SubBrand := str_remove(SubBrand, " CM$")]
-  df[, SubBrand := str_remove(SubBrand, "/$")]
-  df[, SubBrand := str_trim(SubBrand)]
-  df[, SubBrand := str_to_title(SubBrand)]
+  df[, SubBrand := mapply(addSubBrand2, SKU)]
   
 }
 
-
-
-
-
+addSubBrand2 = function(sku) {
+  
+  SKUBrand = df[SKU == sku, unique(Brand)]
+  
+  if (length(SKUBrand) > 1) {
+    print("More than one brand are assigned to SKU")
+  }
+  
+  SubBrands = df[Brand == SKUBrand & !is.na(SubBrand) & SubBrand != "NA",
+                 unique(SubBrand)]
+  
+  if (length(SubBrands) > 0) {
+  
+    sku = str_remove(sku, "[0-9]+[GML]+")
+    sku = str_squish(sku)
+  
+  
+  similarity = stringsim(sku,
+                        toupper(SubBrands),
+                        method = c("lv"),
+                        q = 4)
+  maxSimilarity = which(similarity == max(similarity))
+  
+  } else {SubBrand = NA}
+  
+  if (length(maxSimilarity) > 1) {
+    print(sku)
+    print(SubBrands[maxSimilarity])
+    SubBrand = NA
+    
+  } else {
+    SubBrand = SubBrands[maxSimilarity]
+    
+  }
+  return(SubBrand)
+}
