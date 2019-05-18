@@ -6,7 +6,11 @@ library(stringr)
 source("/home/sergiy/Documents/Work/Nutricia/Scripts/Pivot2/addAge.R")
 source("/home/sergiy/Documents/Work/Nutricia/Scripts/Pivot2/addPS2.R")
 source("/home/sergiy/Documents/Work/Nutricia/Scripts/Pivot2/addSubBrand.R")
+source("/home/sergiy/Documents/Work/Nutricia/Scripts/Pivot2/correctSegments.R")
+source("/home/sergiy/Documents/Work/Nutricia/Scripts/Pivot2/add_EC_AC.R")
+
 setwd("/home/sergiy/Documents/Work/Nutricia/Rework/201903")
+
 df = fread("N_Y2015-Y19_M03.csv", check.names = TRUE, na.strings = "NA")
 df1 = fread("N_Y2015-Y19_M03_value.csv", check.names = TRUE, na.strings = "NA")
 
@@ -45,9 +49,11 @@ df[dictSegments,
    on = c(DANONE.SUB.SEGMENT = "NielsenSegment"), 
    `:=`(PS = i.PS, PS3 = i.PS3, PS0 = i.PS0)] # this is wrong due to PS2
 
+df = correctSegments(df)
 df = addPS2(df)
-df[, SubBrand := mapply(addSubBrand2, SKU)]
-# df = addSubBrand(df)
+# df[, SubBrand := mapply(addSubBrand2, SKU)]
+df = addSubBrand(df)
+df[, SubBrand := NA]
 
 # Size
 df[, Size := str_extract(SKU, "[0-9]+[GML]+")]
@@ -169,18 +175,11 @@ df[.(PS3 = "Fruits", dictPriceSegments[Segment == "Fruits"]),
    on = c(Brand = "Brand", PS3 = "Segment"), 
    GlobalPriceSegment := i.GlobalPriceSegment]
 
-# Extrapolation
 
-# Extrapolation coefficients
-df[dictEC, on = c("Channel", "PS3"), EC := i.EC]
-df[PS == "Digestive Comfort" & Channel == "MT", EC := 1.1]
-df[PS == "Digestive Comfort" & Channel == "PHARMA", EC := 1.0041891]
-df[PS == "Hypoallergenic" & Channel == "MT", EC := 1.1]
-df[PS == "Hypoallergenic" & Channel == "PHARMA", EC := 1.1]
-df[is.na(EC), .N]
+df = add_EC_AC(df)
 
-df[, `:=`(VolumeC = Volume*EC,
-          ValueC = Value*EC)]
+df[, `:=`(VolumeC = Volume*EC*AC,
+          ValueC = Value*EC*AC)]
 # df[, ValueC := Value*EC]
 
 df = df[, .(SKU, Ynb, Mnb,
@@ -188,7 +187,7 @@ df = df[, .(SKU, Ynb, Mnb,
             PS0, PS2, PS3, PS,
             Form, Channel, 
             PriceSegment, GlobalPriceSegment,
-            Volume, Value, EC, VolumeC, ValueC)]
+            Volume, Value, EC, AC, VolumeC, ValueC)]
 
 # df = df[, .(SKU, Ynb, Mnb,
 #             Brand, SubBrand, Size, Age, Company,
