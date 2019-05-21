@@ -52,7 +52,7 @@ df[dictSegments,
 df = correctSegments(df)
 df = addPS2(df)
 # df[, SubBrand := mapply(addSubBrand2, SKU)]
-df = addSubBrand(df)
+#df = addSubBrand(df)
 df[, SubBrand := NA]
 
 # Size

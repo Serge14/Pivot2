@@ -37,25 +37,42 @@ add_EC_AC = function(df) {
   df[Ynb >= 2019 & 
        PS == "Hypoallergenic", 
      AC := 0.95]
-  
+
+  df[Ynb == 2017 & Channel == "PHARMA" & 
+       PS3 == "Specials" &
+       PS != "Digestive Comfort" & PS != "Hypoallergenic", 
+     AC := 1.1]
+    
   df[Ynb == 2018 & Mnb %in% c(1, 2, 3, 5) & Channel == "PHARMA" & 
        PS3 == "Specials" &
        PS != "Digestive Comfort" & PS != "Hypoallergenic", 
      AC := 1.1]
   
-  df[Ynb == 2018 & Mnb %in% c(1, 2, 3, 5) & Channel == "PHARMA" & 
+  df[Ynb == 2018 & Mnb %in% c(1, 2, 3, 5) & 
        PS3 == "Specials" &
        PS != "Digestive Comfort" & PS != "Hypoallergenic", 
      AC := 1.1]
   
-  df[Ynb == 2018 & Mnb %in% c(10, 11, 12) & Channel == "PHARMA" & 
+  df[Ynb == 2018 & Mnb %in% c(10, 11, 12) & 
        PS3 == "Specials" &
        PS != "Digestive Comfort" & PS != "Hypoallergenic", 
      AC := 0.95]
+  
+  df[Ynb >= 2019 & 
+       PS3 == "Specials" &
+       PS != "Digestive Comfort" & PS != "Hypoallergenic", 
+     AC := 0.95]
+  
+  df[Ynb == 2018 & Mnb %in% c(3, 5, 6) & Channel == "PHARMA" & 
+       (PS3 == "Base" | PS3 == "Plus"),
+    AC := 1.1]
+  
+  df[Ynb == 2018 & Mnb == 12 & Channel == "PHARMA" & 
+       (PS3 == "Base" | PS3 == "Plus"),
+     AC := 0.985]
   
   df[Ynb >= 2019 & Channel == "PHARMA" & 
-       PS3 == "Specials" &
-       PS != "Digestive Comfort" & PS != "Hypoallergenic", 
-     AC := 0.95]
+       (PS3 == "Base" | PS3 == "Plus"),
+     AC := 0.985]
   
 }
