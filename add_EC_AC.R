@@ -13,6 +13,12 @@ add_EC_AC = function(df) {
   # Additional corrections
   
   df[, AC := 1]
+  
+  # Old problem, Pharma * 1.3
+  df[Ynb == 2016 & Mnb %in% c(3:9) & 
+       Channel == "PHARMA" & 
+       PS3 != "Specials", 
+     AC := 1.3]
  
   df[Ynb == 2017 & Mnb %in% c(7:12) & Channel == "PHARMA" & 
        PS == "Digestive Comfort", 
@@ -74,5 +80,9 @@ add_EC_AC = function(df) {
   df[Ynb >= 2019 & Channel == "PHARMA" & 
        (PS3 == "Base" | PS3 == "Plus"),
      AC := 0.985]
+  
+  df[Ynb == 2019 & Mnb >= 5 & Channel == "PHARMA" & 
+       (PS3 == "Fruits" | PS3 == "Savoury Meal"),
+     AC := 1.2]
   
 }
